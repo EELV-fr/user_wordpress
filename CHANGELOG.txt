@@ -1,0 +1,22 @@
+v 0.2.3
+Fix : remove WP action_key filtering
+Add : Improve french translation
+
+v 0.2.2
+Fix : user search is now working properly
+
+v 0.2.1
+Add : Create au group for all wordpress users
+
+v 0.2.0
+Add : option to display only users already logged-in
+Add : Auto create groups for each WP-blogs
+
+v 0.1.2
+Fix : fix a PHP error, allows to connect via webdav clients
+
+v 0.1.1
+Add : hide wordpress DB password in admin panel
+
+V 0.1.0
+Initial release

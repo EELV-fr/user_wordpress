@@ -1,0 +1,73 @@
+/**
+* ownCloud - Cloudpress
+*
+* @author Bastien Ho (EELV - Urbancube)
+* @copyleft 2012 bastienho@urbancube.fr
+* @projeturl http://ecolosites.eelv.fr
+*
+* Free Software under creative commons licence
+* http://creativecommons.org/licenses/by-nc/3.0/
+* Attribution-NonCommercial 3.0 Unported (CC BY-NC 3.0)
+* 
+* You are free:
+* to Share — to copy, distribute and transmit the work
+* to Remix — to adapt the work
+*
+* Under the following conditions:
+* Attribution — You must attribute the work in the manner specified by the author or licensor (but not in any way that
+* suggests  that they endorse you or your use of the work).
+* Noncommercial — You may not use this work for commercial purposes.
+*
+*/
+#sitelistpage{
+  margin-top:40px;
+  width:100%;
+}
+#sitelistpage table{
+  width:100%;
+}
+#sitelistpage table td,#sitelistpage table  th{
+  padding:5px;
+}
+#sitelistpage table td + td,#sitelistpage table th + th{
+  width:15%;
+}
+
+#sitelistpage table th,#sitelistpage table td{
+  background:#FFF;
+  padding:7px;
+  border-top:#FFF 1px solid;
+  border-bottom:#DDD 1px solid;  
+}
+#sitelistpage table td{
+  background:#F5F5F5; 
+}
+
+
+#sitepage{
+  width:100%;
+}
+
+#sitepage iframe{
+  width:100%;
+}
+.wordpresshare{
+  opacity:0;
+  background:#FFF;
+  position:absolute;
+  right:30px;
+  padding:0px;
+  border:#CCC 1px solid;
+  border-top:none;
+  border-radius:5px;
+  z-index:101;
+}
+.wordpresshare ul li{
+  padding:5px;
+  border:#EEE 1px outset;
+  background:#FFF;
+}
+
+.wordpresshare ul li:hover{
+  background:#EEE;
+}
