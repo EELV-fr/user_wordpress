@@ -14,6 +14,5 @@
 	</types>
 	<remote>
 		<wordav>wordav.php</wordav>
-		<ocaldav>caldav.php</ocaldav>
 	</remote>
 </info>
