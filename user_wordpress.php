@@ -31,68 +31,35 @@ class OC_user_wordpress extends OC_User_Backend {
   protected $db;
   protected $db_conn;
   protected $wp_all_users;
+  static $params;
 
   function __construct() {
-    $this->connectdb();
+	$this->wp_instance = new OC_wordpress();
+    $this->wp_instance->connectdb();
+	$uid=OC_User::getUser();
+	if($uid){		
+		$this->current_user_blogs = $this->wp_instance->getUserblogsIds($uid);
+	}
+	self::$params =$this->wp_instance->params;
   }
   /**
    * @brief Set email address
    * @param $uid The username
    */
   public function connectdb() {
-   $this->db_conn = false;
-    $this->wordpress_db_host = OC_Appconfig::getValue('user_wordpress', 'wordpress_db_host','');
-    $this->wordpress_db_name = OC_Appconfig::getValue('user_wordpress', 'wordpress_db_name','');
-    $this->wordpress_db_user = OC_Appconfig::getValue('user_wordpress', 'wordpress_db_user','');
-    $this->wordpress_db_password = OC_Appconfig::getValue('user_wordpress', 'wordpress_db_password','');
-    $this->wordpress_db_prefix = OC_Appconfig::getValue('user_wordpress', 'wordpress_db_prefix','');
-    $this->wordpress_hash_salt = OC_Appconfig::getValue('user_wordpress', 'wordpress_hash_salt','');
-    $this->wordpress_have_to_be_logged = OC_Appconfig::getValue('user_wordpress', 'wordpress_have_to_be_logged','');
-    $this->wordpress_global_group = OC_Appconfig::getValue('user_wordpress', 'wordpress_global_group','');
-
-    if(empty($this->wordpress_db_host)) $this->wordpress_db_host=OC_Config::getValue( "dbhost", "" );
-    if(empty($this->wordpress_db_name)) $this->wordpress_db_name=OC_Config::getValue( "dbname", "owncloud" );
-    if(empty($this->wordpress_db_user)) $this->wordpress_db_user=OC_Config::getValue( "dbuser", "" );
-    if(empty($this->wordpress_db_password)) $this->wordpress_db_password=OC_Config::getValue( "dbpassword", "" );
-    if(empty($this->wordpress_have_to_be_logged)){
-		 $this->wordpress_have_to_be_logged='0';
-		 OC_Appconfig::setValue('user_wordpress', 'wordpress_have_to_be_logged', '0');
-	}
-    $this->wp_all_users=array();
-    $errorlevel = error_reporting();
-    error_reporting($errorlevel & ~E_WARNING);
-    $this->db = mysql_connect($this->wordpress_db_host, $this->wordpress_db_user, $this->wordpress_db_password);
-    if(!$this->db){
-      OC_Log::write('OC_user_wordpress',
-          'OC_user_wordpress, Failed to connect to wordpress host database: ' . mysql_error($this->db),
-          OC_Log::ERROR);
-      return false;
-    }
-    mysql_select_db($this->wordpress_db_name,$this->db);
-    if(!$this->db){
-      OC_Log::write('OC_user_wordpress',
-          'OC_user_wordpress, Failed to connect to wordpress database: ' . mysql_error($this->db),
-          OC_Log::ERROR);
-      return false;
-    }
-   $this->db_conn = true;
-    //$this->wordpress_db_prefix = $this->db->real_escape_string($this->wordpress_db_prefix);
+  	$this->db_conn = $this->wp_instance->connectdb();
   }
   
-  private function setEmail($uid) {
-    if (!$this->db_conn) {
-      $this->connectdb();
-    }
-    if (!$this->db_conn) {
+  private function setUserInfos($uid) {
+    $this->connectdb();
+    if (!$this->db_conn)
       return false;
-    }
 
-    $q = 'SELECT user_email FROM '. $this->wordpress_db_prefix .'users WHERE user_login = "'. str_replace('"','""',$uid) .'" AND user_status = 0';
+    $q = 'SELECT `user_email` FROM '. self::$params['wordpress_db_prefix'] .'users WHERE user_login = "'. str_replace('"','""',$uid) .'" AND user_status = 0';
     $result = mysql_query($q);
     if ($result && mysql_num_rows($result)>0) {
-      $email = mysql_fetch_assoc($result);
-      $email = $email['user_email'];
-      OC_Preferences::setValue($uid, 'settings', 'email', $email);
+      $user_infos = mysql_fetch_assoc($result);
+      OC_Preferences::setValue($uid, 'settings', 'email', $user_infos['user_email']);
     }
   }
   
@@ -105,7 +72,7 @@ class OC_user_wordpress extends OC_User_Backend {
     if (!$this->db_conn) {
       return false;
     }
-    $query = 'SELECT user_login,user_pass FROM '. $this->wordpress_db_prefix .'users WHERE user_login = "' . str_replace('"','""',$uid) . '"';
+    $query = 'SELECT user_login,user_pass FROM '. self::$params['wordpress_db_prefix'] .'users WHERE user_login = "' . str_replace('"','""',$uid) . '"';
     $query .= ' AND user_status = 0';
     $result = mysql_query($query);
     if ($result && mysql_num_rows($result)>0) {
@@ -117,19 +84,19 @@ class OC_user_wordpress extends OC_User_Backend {
     $check = $wp_hasher->CheckPassword($password, $hash);
     
       if ($check==true) {
-		  if($this->wordpress_global_group!=''){
-			 if(!OC_Group::groupExists($this->wordpress_global_group)){
-				  OC_Group::createGroup($this->wordpress_global_group);
+		  if(self::$params['wordpress_global_group']!=''){
+			 if(!OC_Group::groupExists(self::$params['wordpress_global_group'])){
+				  OC_Group::createGroup(self::$params['wordpress_global_group']);
 			  }					
 			  
-			  if( OC_Group::inGroup( $uid, $this->wordpress_global_group )){
+			  if( OC_Group::inGroup( $uid, self::$params['wordpress_global_group'] )){
 				  // Do nothing					
 			  }
 			  else{
-				  OC_Group::addToGroup( $uid, $this->wordpress_global_group );
+				  OC_Group::addToGroup( $uid, self::$params['wordpress_global_group'] );
 			  }
 		 }
-        $this->setEmail($uid);
+        $this->setUserInfos($uid);
         return $row['user_login'];
       }
     }
@@ -143,7 +110,7 @@ class OC_user_wordpress extends OC_User_Backend {
     if (!$this->db_conn) {
       return false;
     }
-    $query = 'SELECT user_pass FROM '. $this->wordpress_db_prefix .'users WHERE user_login = "' . str_replace('"','""',$uid) . '"AND user_status = 0';
+    $query = 'SELECT user_pass FROM '. self::$params['wordpress_db_prefix'] .'users WHERE user_login = "' . str_replace('"','""',$uid) . '"AND user_status = 0';
     $result = mysql_query($query);
     if ($result && mysql_num_rows($result)>0) {
 		$ro=mysql_fetch_array($result);
@@ -170,52 +137,81 @@ class OC_user_wordpress extends OC_User_Backend {
       return;
     }
 	$CONFIG_DATADIRECTORY = OC_Config::getValue( "datadirectory", OC::$SERVERROOT."/data" );
-	$q = 'SELECT user_login FROM '. $this->wordpress_db_prefix .'users WHERE user_status = 0 ORDER BY `user_login` '; 
+	$q = 'SELECT `user_login`,`display_name` FROM '. self::$params['wordpress_db_prefix'] .'users WHERE user_status = 0 ORDER BY `user_login` '; 
     $result = mysql_query($q);
     if ($result && mysql_num_rows($result)>0) {
 		$i=0;
       while ($row = mysql_fetch_assoc($result)){
         if(!empty($row['user_login']) ) {
-			if($this->wordpress_have_to_be_logged=='0'){ 
-				$this->wp_all_users[] = $row['user_login'];
-			}
-			elseif(is_dir($CONFIG_DATADIRECTORY.'/'.$row['user_login'])){
-				$this->wp_all_users[] = $row['user_login'];
+			if(self::$params['wordpress_have_to_be_logged']=='0' || is_dir($CONFIG_DATADIRECTORY.'/'.$row['user_login'])){ 
+				$this->wp_all_users[] = array(
+					'login'=>$row['user_login'],
+					'display_name'=>$row['display_name']
+				);
 			}
 			else{
 				// who goe's to hunt loose his place	
 			}
 		}
 	  }
-	  $this->wp_all_users=array_unique($this->wp_all_users);	  
-      sort($this->wp_all_users);
 	}
   }
-
-  /*  a list of all users from wordpress DB */
-  public function getUsers($search = '', $limit = NULL, $offset = NULL) {	  
-	$users=array();
-	$start=0;
+  public function getPartWpUsers($search = '', $limit = NULL, $offset = NULL){
+  	$start=0;
 	$fin=sizeof($this->wp_all_users);
 		
 	if($fin==0){
 		$this->getAllWpUsers();
 		$fin=sizeof($this->wp_all_users);
 	}
-	if($fin==0){
-		return $users;
-	}
+	
 	$nb_users=$fin;
 	if($search==''){
 		if($offset!=NULL) $start=$offset;
 		if($limit!=NULL) $fin=$start+$limit; 
-	}
-	
+	}	
 	if($fin>$nb_users) $fin=$nb_users;
-	  //echo $limit.'/'.$offset.'*';
-	for($i=$start ; $i<$fin ; $i++){
-		if($search=='' || strpos($this->wp_all_users[$i],$search)>-1){
-			$users[] = $this->wp_all_users[$i];
+	return array('start'=>$start,'fin'=>$fin);
+  }
+  public function getSearchWpUser($user,$search){
+  	if($search=='') return true;
+  	if(strpos(strtolower($user['login']),strtolower($search))>-1 || strpos(strtolower($user['display_name']),strtolower($search))>-1){
+  		if(self::$params['wordpress_restrict_group']==1){
+  			$thisuserblogs = $this->wp_instance->getUserblogsIds($user['login']);
+			$inter = array_intersect($thisuserblogs,$this->current_user_blogs);
+			if($inter==false || sizeof($inter)==0){
+				return false;
+			}
+  		}
+		return true;
+	}
+	return false;
+  }
+
+  /*  a list of all users from wordpress DB */
+  public function getUsers($search = '', $limit = NULL, $offset = NULL) {
+	$users=array();
+	$plage = $this->getPartWpUsers($search, $limit, $offset);		  
+	if($plage['fin']==0){
+		return $users;
+	}
+	for($i=$plage['start'] ; $i<$plage['fin'] ; $i++){
+		if($this->getSearchWpUser($this->wp_all_users[$i],$search)){
+			$users[] = $this->wp_all_users[$i]['user_login'];
+		}
+    }
+    return $users;
+  }
+  /* Assoc display names from WP database */
+  public function getDisplayNames($search = '', $limit = NULL, $offset = NULL) {	  
+	$users=array();
+	$plage = $this->getPartWpUsers($search, $limit, $offset);		  
+	if($plage['fin']==0){
+		return $users;
+	}
+	for($i=$plage['start'] ; $i<$plage['fin'] ; $i++){
+		if($this->getSearchWpUser($this->wp_all_users[$i],$search)){
+			$users[$this->wp_all_users[$i]['login']] = (!empty($this->wp_all_users[$i]['display_name']))?$this->wp_all_users[$i]['display_name']:$this->wp_all_users[$i]['login'];
 		}
     }
     return $users;
@@ -231,7 +227,7 @@ class OC_user_wordpress extends OC_User_Backend {
     if (!$this->db_conn) {
       return false;
     }
-    $q = 'SELECT user_login FROM '. $this->wordpress_db_prefix .'users WHERE user_login = "'. str_replace('"','""',$uid) .'"  AND user_status = 0';
+    $q = 'SELECT user_login FROM '. self::$params['wordpress_db_prefix'] .'users WHERE user_login = "'. str_replace('"','""',$uid) .'"  AND user_status = 0';
     $result = mysql_query($q);
     if ($result && mysql_num_rows($result)>0) {
       return true;

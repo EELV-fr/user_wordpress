@@ -22,6 +22,8 @@
 */
 
 require_once('apps/user_wordpress/user_wordpress.php');
+require_once('apps/user_wordpress/group_wordpress.php');
+require_once('apps/user_wordpress/lib/wordpress.class.php');
 OC::$CLASSPATH['OC_wordpress_images_menu_sites_icon'] = '/apps/user_wordpress/img/sites.png';  
 OC::$CLASSPATH['OC_wordpress'] = 'apps/user_wordpress/lib/wordpress.class.php';  
 OC::$CLASSPATH['OC_wordpress_site_list'] = '/?app=user_wordpress&getfile=wordpress.php';
@@ -35,20 +37,41 @@ OCP\App::register(Array(
 	'id' => 'cloudpress',
 	'name' => 'Cloudpress'
 )); 
+
 OCP\App::registerAdmin('user_wordpress','settings');
-OCP\App::addNavigationEntry( 
-	array( 
-	'id' => 'wordpress_sites', 
-	'order' => 70, 
-	'href' => OCP\Util::linkTo( 'user_wordpress', 'wordpress.php' ), 
-	'icon' => OC::$CLASSPATH['OC_wordpress_images_menu_sites_icon'], 
-	'name' => 'Sites'
-	)
-);
 OCP\App::registerPersonal('user_wordpress', 'persopress');
+
+$wp_instance = new OC_wordpress();
+if (isset($_POST['wordpress_settings_post'])) {
+  foreach($wp_instance->params as $param=>$value){
+    if(isset($_POST[$param])){
+      OC_Appconfig::setValue('user_wordpress', $param, $_POST[$param]);
+	  $wp_instance->params[$param]=$_POST[$param];
+    }
+	else{
+      OC_Appconfig::setValue('user_wordpress', $param, '');
+	  $wp_instance->params[$param]='';
+    }
+  }
+}
+
+if($wp_instance->params['wordpress_add_button']==1){
+	OCP\App::addNavigationEntry( 
+		array( 
+		'id' => 'wordpress_sites', 
+		'order' => 70, 
+		'href' => OCP\Util::linkTo( 'user_wordpress', 'wordpress.php' ), 
+		'icon' => OC::$CLASSPATH['OC_wordpress_images_menu_sites_icon'], 
+		'name' => 'Sites'
+		)
+	);
+}
+
 // register user backend
 
 OC_User::useBackend( 'wordpress' );
+OC_Group::useBackend( new OC_group_wordpress() );
+
 
 // add settings page to navigation
 /*
