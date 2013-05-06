@@ -20,29 +20,11 @@
 * Noncommercial — You may not use this work for commercial purposes.
 *
 */
-$params = array(
-    'wordpress_db_host',
-    'wordpress_db_user',
-    'wordpress_db_password',
-    'wordpress_db_name',
-    'wordpress_db_prefix',
-  'wordpress_hash_salt',
-  'wordpress_have_to_be_logged',
-  'wordpress_global_group'
-);
-
-if ($_POST) {
-  foreach($params as $param){
-    if(isset($_POST[$param])){
-      OC_Appconfig::setValue('user_wordpress', $param, $_POST[$param]);
-    }
-  }
-}
+$wp_instance = new OC_wordpress();
 
 // fill template
 $tmpl = new OC_Template('user_wordpress', 'settings');
-foreach($params as $param){
-  $value = OC_Appconfig::getValue('user_wordpress', $param,'');
+foreach($wp_instance->params as $param=>$value){
   $tmpl->assign($param, $value);
 }
 
