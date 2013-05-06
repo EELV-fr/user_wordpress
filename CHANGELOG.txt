@@ -1,3 +1,10 @@
+v 0.2.6
+Add : Optionnal blog group restriction for user search
+Add: Display name for users
+Add : Optionnal "Sites" button in the main menu
+Fix : Performances optimizations
+Fix : Bugfix
+
 v 0.2.5
 Fix : OC5 friendly
 
