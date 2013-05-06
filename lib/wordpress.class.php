@@ -26,7 +26,6 @@ class OC_wordpress {
 
   function OC_wordpress() {
   	$this->db_conn = '';
-    $this->connectdb();
 	$this->params = array(
 	'wordpress_db_host',
 	'wordpress_db_user',
@@ -50,6 +49,7 @@ class OC_wordpress {
 		}
 		OC_Appconfig::setValue('user_wordpress', 'clean_groups','1');
 	}
+    $this->connectdb();
 	
   }
   public function getParams(){
@@ -187,10 +187,10 @@ class OC_wordpress {
     }
 	$query=($search!='')?' `domain`LIKE\'%'.str_replace("'","''",$search).'%\' AND':'';
 	$plage=($limit>0)? 'LIMIT '.$offset.','.$limit :'';
-	$res = mysql_query('SELECT `blog_id`,`domain` FROM '. $this->wordpress_db_prefix .'blogs WHERE '.$query.' `deleted`=0 AND `spam`=0 '.$plage);
-    if ($res && mysql_num_rows($res)>0) {
+	$res = mysql_query('SELECT `blog_id`,`domain` FROM '. $this->params['wordpress_db_prefix'] .'blogs WHERE '.$query.' `deleted`=0 AND `spam`=0 ORDER BY `domain`'.$plage);
+	if ($res && mysql_num_rows($res)>0) {
        while($blog = mysql_fetch_assoc($res)){
-       	if($search=='' || $this->params['wordpress_restrict_group']!=1 || ($this->params['wordpress_restrict_group']==1 && in_array($blog['blog_id'],$current_user_blog_ids))){
+       	if($search=='' || $this->params['wordpress_restrict_group']!=1 || in_array($blog['blog_id'],$current_user_blog_ids)){
        		$blogs[]=$blog['domain'];
        	}         
       }
