@@ -2,6 +2,25 @@
 	<input type="hidden" name="wordpress_settings_post" value="1"/>
     <fieldset class="personalblock">
         <strong>Wordpress</strong><br/>
+        <?php
+        if (isset($_POST['wordpress_settings_post'])) {
+        	?>
+        	<script>
+        	$(document).ready(function(){
+                      OC.Notification.show(t('files_etherpad', <?php
+        	$wp_instance = new OC_wordpress();
+			if($wp_instance->connectdb()){
+				?>t('user_wordpress', 'Connection to WP database successfully established !')<?php
+			}
+			else{
+				?>t('user_wordpress', 'Error while connecting to WP database !')<?php
+			}
+			?>));
+			});
+            </script>
+        	<?php
+		}
+        ?>
         
         <?php echo $l->t('Database') ?>
         <blockquote>

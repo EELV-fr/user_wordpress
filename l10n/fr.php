@@ -23,5 +23,8 @@
 'Restrict users to their WordPress groups'=>'Restreindre les utilisateurs à leurs groupes WordPress',
 '(excepting global group)'=>'(excepté le groupe global)',
 'Add a "sites" button to main menu'=>'Ajouter un bouton "Sites" au menu principal',
-"Save"=>"Enregistrer"
+"Save"=>"Enregistrer",
+
+'Connection to WP database successfully established !'=>'Connection à la base de données WP établie avec succès !',
+'Error while connecting to WP database !'=>'Errueur lors de la connection à la base de données WP !',
 );
