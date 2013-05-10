@@ -196,7 +196,7 @@ class OC_user_wordpress extends OC_User_Backend {
 		return $users;
 	}
 	for($i=$plage['start'] ; $i<$plage['fin'] ; $i++){
-		if($this->getSearchWpUser($this->wp_all_users[$i],$search)){
+		if($this->getSearchWpUser($this->wp_all_users[$i],$search) && isset($this->wp_all_users[$i]['user_login'])){
 			$users[] = $this->wp_all_users[$i]['user_login'];
 		}
     }
