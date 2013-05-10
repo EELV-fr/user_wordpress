@@ -27,4 +27,8 @@
 
 'Connection to WP database successfully established !'=>'Connection à la base de données WP établie avec succès !',
 'Error while connecting to WP database !'=>'Errueur lors de la connection à la base de données WP !',
+
+'You have no site registered, please check your'=>'Vous n\'avez aucun site enregistré, veuillez vérifier votre',
+'Site list on WordPress'=>'Liste de sites sur WordPress',
+'Open it in a new window'=>'Ouvrir dans une nouvelle fenêtre',
 );

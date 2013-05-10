@@ -12,25 +12,38 @@
     </tr>
   </thead>
   <tbody>
+    <?php if(sizeof($_['blogs'])>0): ?>
     <?php foreach($_['blogs'] as $blog) : ?>
       <tr data-file="link" data-type="site">
         <td class="filename svg">
-          <a class="name" href="<?=OC::$CLASSPATH['OC_wordpress_site_list']?>&url=<?=$blog['domain']?>/wp-admin" title="<?=$blog['domain']?>"><?=$blog['domain']?></a>
+          <a class="name" href="<?=OC::$CLASSPATH['OC_wordpress_site_list']?>?url=<?=$blog['domain']?>/wp-admin" title="<?=$blog['domain']?>"><?=$blog['domain']?></a>
+          <a class="name" href="<?=$blog['domain']?>/wp-admin/" title="<?php echo $l->t('Open it in a new window') ?>" target="_blank">+</a>
         </td>
        <td>
-         <a class="name" href="<?=OC::$CLASSPATH['OC_wordpress_site_list']?>&url=<?=$blog['domain']?>" title="admin"><?php echo $l->t('Visit') ?></a>
+         <a class="name" href="<?=OC::$CLASSPATH['OC_wordpress_site_list']?>?url=<?=$blog['domain']?>" title="admin"><?php echo $l->t('Visit') ?></a>
+         <a class="name" href="<?=$blog['domain']?>" title="<?php echo $l->t('Open it in a new window') ?>" target="_blank">+</a>
         </td>
        <td>
          <?=relative_modified_date($blog['registered'])?>
         </td>
       </tr>
     <?php endforeach; ?>
+    <?php else: ?>
+    	<tr><td colspan="3">
+    	<?php echo $l->t('You have no site registered, please check your') ?>
+    	 <a class="name" href="<?=OC::$CLASSPATH['OC_wordpress_site_list']?>?url=<?php echo $_['wordpress_url']; ?>/wp-admin/my-sites.php" title="admin"><?php echo $l->t('Site list on WordPress') ?></a>
+    	 <a class="name" href="<?php echo $_['wordpress_url']; ?>/wp-admin/my-sites.php" title="<?php echo $l->t('Open it in a new window') ?>" target="_blank">+</a>
+    	 </td></tr>
+    <?php endif; ?>
   </tbody>
 </table>
   </div>
-<?php else: $url=$_GET['url']; ?>
+<?php else: 
+	$url=$_GET['url']; 
+	if(strpos($url,'://')<0) $url='http://'.$url;
+	?>
   <div id='sitepage'>
-  <iframe  id = "ifm"  src="http://<?=$url?>"></iframe>
+  <iframe  id = "ifm"  src="<?=$url?>"></iframe>
 </div>
   <script type='text/javascript'>
 function pageY(elem) {
