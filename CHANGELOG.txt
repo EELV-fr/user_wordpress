@@ -1,3 +1,6 @@
+v 0.2.61
+Fix : PHP warning 'user_login' index
+
 v 0.2.6
 Add : Optionnal blog group restriction for user search
 Add: Display name for users
