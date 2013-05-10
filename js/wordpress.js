@@ -60,7 +60,7 @@ function publishdialog(sites_list,type,itemSource,file){
 
 $(document).ready(function () {
   var b = {};
-  if (typeof FileActions !== 'undefined') {
+  if (typeof FileActions !== 'undefined' && $('#dir').length>0) {
     
     FileActions.register('file', t('user_wordpress','Publish'), OC.PERMISSION_READ, function (file) {
       return OC.imagePath('user_wordpress', 'publish.png');

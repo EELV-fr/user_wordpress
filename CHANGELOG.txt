@@ -1,3 +1,6 @@
+v 0.2.63
+Fix : do not show publish in trashbin
+
 v 0.2.62
 Add : Dialog in admin panel to confirm WP database connection
 
