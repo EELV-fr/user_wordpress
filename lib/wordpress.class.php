@@ -32,6 +32,7 @@ class OC_wordpress {
 	'wordpress_db_password',
 	'wordpress_db_name',
 	'wordpress_db_prefix',
+	'wordpress_url',
 	'wordpress_hash_salt',
 	'wordpress_have_to_be_logged',
 	'wordpress_global_group',
@@ -128,7 +129,7 @@ class OC_wordpress {
    if(false !== $user_ID = $this->getUserId($uid)){
 	   
       
-     $q = 'SELECT meta_key FROM '. $this->params['wordpress_db_prefix'] .'usermeta WHERE user_id = \''.$user_ID.'\' AND `meta_key`LIKE\'%capabilities\' AND (`meta_value`LIKE\'%keymaster%\' OR `meta_value`LIKE\'%administrator%\' OR `meta_value`LIKE\'%editor%\' OR `meta_value`LIKE\'%author%\')';
+     $q = 'SELECT meta_key FROM '. $this->params['wordpress_db_prefix'] .'usermeta WHERE user_id = \''.$user_ID.'\' AND `meta_key`LIKE\'%capabilities\' AND (`meta_value`LIKE\'%keymaster%\' OR `meta_value`LIKE\'%administrator%\' OR `meta_value`LIKE\'%editor%\' OR `meta_value`LIKE\'%author%\' OR `meta_value`LIKE\'%contributor%\')';
 	$result = mysql_query($q);
      if ($result && mysql_num_rows($result)>0) {
        while ($row = mysql_fetch_assoc($result)){
@@ -183,7 +184,7 @@ class OC_wordpress {
     $blogs = array();
 	$current_user_blog_ids=array();
 	if($search!='' && $this->params['wordpress_restrict_group']==1){
-       	$current_user_blog_ids = $this->getUserblogsIds();	
+       	$current_user_blog_ids = $this->getUserblogsIds();
     }
 	$query=($search!='')?' `domain`LIKE\'%'.str_replace("'","''",$search).'%\' AND':'';
 	$plage=($limit>0)? 'LIMIT '.$offset.','.$limit :'';

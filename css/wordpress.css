@@ -42,7 +42,22 @@
 #sitelistpage table td{
   background:#F5F5F5; 
 }
-
+#sitelistpage a{
+	color:#001133;
+	text-decoration:underline;
+}
+#sitelistpage a[target=_blank]{
+	display:inline-block;
+	padding:1px;
+	border:#CCC 1px solid;
+	background:#FFF;
+	height:6px;
+	width:6px;
+	color:#CCC;
+	font-size:6px;
+	line-height: 6px;
+	text-decoration:none;
+}
 
 #sitepage{
   width:100%;

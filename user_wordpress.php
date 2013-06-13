@@ -165,15 +165,15 @@ class OC_user_wordpress extends OC_User_Backend {
 		$fin=sizeof($this->wp_all_users);
 	}
 	
-	$nb_users=$fin;
+	//$nb_users=$fin;
 	if($search==''){
 		if($offset!=NULL) $start=$offset;
 		if($limit!=NULL) $fin=$start+$limit; 
 	}	
-	if($fin>$nb_users) $fin=$nb_users;
+	//if($fin>$nb_users) $fin=$nb_users;
 	return array('start'=>$start,'fin'=>$fin);
   }
-  public function getSearchWpUser($user,$search){
+  public function getSearchWpUser($user,$search=''){
   	if($search=='') return true;
   	if(strpos(strtolower($user['login']),strtolower($search))>-1 || strpos(strtolower($user['display_name']),strtolower($search))>-1){
   		if(self::$params['wordpress_restrict_group']==1){
@@ -202,6 +202,12 @@ class OC_user_wordpress extends OC_User_Backend {
     }
     return $users;
   }
+  public function format_txt($str){
+  	setlocale(LC_ALL, "en_US.utf8");
+	return iconv("utf-8", "ascii//TRANSLIT", $str);
+  	//$str = htmlentities($str); 
+  	//return str_replace( array('à','á','â','ã','ä', 'ç', 'è','é','ê','ë', 'ì','í','î','ï', 'ñ', 'ò','ó','ô','õ','ö', 'ù','ú','û','ü', 'ý','ÿ', 'À','Á','Â','Ã','Ä', 'Ç', 'È','É','Ê','Ë', 'Ì','Í','Î','Ï', 'Ñ', 'Ò','Ó','Ô','Õ','Ö', 'Ù','Ú','Û','Ü', 'Ý'), array('a','a','a','a','a', 'c', 'e','e','e','e', 'i','i','i','i', 'n', 'o','o','o','o','o', 'u','u','u','u', 'y','y', 'A','A','A','A','A', 'C', 'E','E','E','E', 'I','I','I','I', 'N', 'O','O','O','O','O', 'U','U','U','U', 'Y'), $str);
+  }	
   /* Assoc display names from WP database */
   public function getDisplayNames($search = '', $limit = NULL, $offset = NULL) {	  
 	$users=array();
@@ -210,8 +216,8 @@ class OC_user_wordpress extends OC_User_Backend {
 		return $users;
 	}
 	for($i=$plage['start'] ; $i<$plage['fin'] ; $i++){
-		if($this->getSearchWpUser($this->wp_all_users[$i],$search)){
-			$users[$this->wp_all_users[$i]['login']] = (!empty($this->wp_all_users[$i]['display_name']))?$this->wp_all_users[$i]['display_name']:$this->wp_all_users[$i]['login'];
+		if(isset($this->wp_all_users[$i]) && $this->getSearchWpUser($this->wp_all_users[$i],$search)){
+			$users[$this->wp_all_users[$i]['login']] = (!empty($this->wp_all_users[$i]['display_name']))?$this->format_txt($this->wp_all_users[$i]['display_name']):$this->wp_all_users[$i]['login'];
 		}
     }
     return $users;
