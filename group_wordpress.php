@@ -61,9 +61,10 @@ class OC_group_wordpress extends OC_Group_Backend {
   }
   
   	public function getGroups($search = '', $limit = -1, $offset = 0) {
-  		if (!self::$db_conn)
-	  		return array();
-		return self::$wp_instance->getAllBlogs(isset($_GET['search'])?$_GET['search']:'', $limit, $offset);
+  		if (!self::$db_conn){
+  			return array();
+  		}
+		return self::$wp_instance->getAllBlogs(isset($_GET['search'])?$_GET['search']:$search, $limit, $offset);
 	}
 	public function groupExists($gid) {
 		return in_array($gid, self::getGroups($gid, 1));
@@ -72,30 +73,4 @@ class OC_group_wordpress extends OC_Group_Backend {
 		return array();
 	}
 }
-
-/*
- $cp_groups=new OC_group_wordpress();
-    
-	foreach($blogids as $blog_id){
-     if(is_numeric($blog_id)){
-           $res = mysql_query('SELECT * FROM '. self::wordpress_db_prefix .'blogs WHERE blog_id = \''.$blog_id.'\' AND `deleted`=0 AND `spam`=0');
-           if ($res && mysql_num_rows($res)>0) {
-             $blog = mysql_fetch_assoc($res);
-             $blogs[] = $blog;
-			 $group=$blog['domain'];
-			 if(!is_numeric($group)){
-				if(!$cp_groups->groupExists($group)){
-					$cp_groups->createGroup($group);
-				}					
-				
-				if( $cp_groups->inGroup( $uid, $group )){
-					// Do nothing					
-				}
-				else{
-					$cp_groups->addToGroup( $uid, $group );
-				} 
-			 }
-           }
-      }
-    }*/
 
