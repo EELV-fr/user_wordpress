@@ -1,3 +1,8 @@
+v 0.2.7
+Add: add contributors to authorized users
+Add: correct search params
+Fix: PHP warning in users list
+
 v 0.2.63
 Fix : do not show publish in trashbin
 
