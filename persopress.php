@@ -25,6 +25,9 @@
 $tmpl = new OC_Template('user_wordpress', 'persopress');
 $uid=OC_User::getUser();
 $wp_instance = new OC_wordpress();
+foreach($wp_instance->params as $param=>$value){
+  $tmpl->assign($param, $value);
+}
 $blogs = $wp_instance->getUserBlogs($uid);
 $tmpl->assign('uid',$uid);
 $tmpl->assign('blogs',$blogs);

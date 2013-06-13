@@ -3,7 +3,11 @@
     <id>user_wordpress</id>
     <name>CloudPress</name>
     <description>Authenticate users using wordpress Database and allow them to share files into their wordpress blog(s)</description>
+<<<<<<< HEAD
     <version>0.2.7</version>
+=======
+    <version>0.2.63</version>
+>>>>>>> debug
     <licence>CC BY-NC 3.0</licence>
     <author>Bastien Ho (EELV)</author>
     <require>4.0.7</require>

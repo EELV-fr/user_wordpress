@@ -32,6 +32,7 @@ class OC_wordpress {
 	'wordpress_db_password',
 	'wordpress_db_name',
 	'wordpress_db_prefix',
+	'wordpress_url',
 	'wordpress_hash_salt',
 	'wordpress_have_to_be_logged',
 	'wordpress_global_group',

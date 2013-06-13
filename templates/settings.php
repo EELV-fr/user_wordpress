@@ -1,7 +1,7 @@
 <form id="wordpress" action="#wordpress" method="post">
 	<input type="hidden" name="wordpress_settings_post" value="1"/>
     <fieldset class="personalblock">
-        <strong>Wordpress</strong><br/>
+    	<legend><strong>CloudPress</strong></legend>
         <?php
         if (isset($_POST['wordpress_settings_post'])) {
         	?>
@@ -21,7 +21,13 @@
         	<?php
 		}
         ?>
-        
+        <strong>WordPress</strong>
+        <blockquote>
+	        <p>
+	            <label for="wordpress_url"><?php echo $l->t('Wordpress URL');?></label>
+	            <input type="text" id="wordpress_url" name="wordpress_url" value="<?php echo $_['wordpress_url']; ?>" placeholder="http://"/>          
+	        </p>
+        </blockquote>
         <?php echo $l->t('Database') ?>
         <blockquote>
 	        <em><?php echo $l->t('(leave empty if same as Owncloud)') ?></em>

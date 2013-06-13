@@ -33,6 +33,13 @@ $uid=OC_User::getUser();
 $wp_instance = new OC_wordpress();
 $blogs = $wp_instance->getUserBlogs($uid);
 $tmpl = new OCP\Template( 'user_wordpress', 'sites', 'user' );
+foreach($wp_instance->params as $param=>$value){
+  $tmpl->assign($param, $value);
+}
 $tmpl->assign('uid',$uid);
+<<<<<<< HEAD
   $tmpl->assign('blogs', $blogs );
+=======
+$tmpl->assign('blogs', $blogs );
+>>>>>>> debug
 $tmpl->printPage();
