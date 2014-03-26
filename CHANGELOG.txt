@@ -1,3 +1,9 @@
+v 0.3.0
+Fix : OC6 friendly
+Fix : MySQL to MySQLi by juergenhecht & bastho
+Add : DE language by glasklar 
+Fix : Bug fixes and some JS optimization
+
 v 0.2.7
 Add: add contributors to authorized users
 Add: correct search params

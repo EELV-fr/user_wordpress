@@ -56,9 +56,9 @@ class OC_user_wordpress extends OC_User_Backend {
       return false;
 
     $q = 'SELECT `user_email` FROM '. self::$params['wordpress_db_prefix'] .'users WHERE user_login = "'. str_replace('"','""',$uid) .'" AND user_status = 0';
-    $result = mysql_query($q);
-    if ($result && mysql_num_rows($result)>0) {
-      $user_infos = mysql_fetch_assoc($result);
+    $result = $this->wp_instance->db->query($q);
+    if ($result && mysqli_num_rows($result)>0) {
+      $user_infos = mysqli_fetch_assoc($result);
       OC_Preferences::setValue($uid, 'settings', 'email', $user_infos['user_email']);
     }
   }
@@ -66,6 +66,8 @@ class OC_user_wordpress extends OC_User_Backend {
   
   /* Check if the password is correct */
   public function checkPassword($uid, $password){
+  	
+	
     if (!$this->db_conn) {
       $this->connectdb();
     }
@@ -74,9 +76,9 @@ class OC_user_wordpress extends OC_User_Backend {
     }
     $query = 'SELECT user_login,user_pass FROM '. self::$params['wordpress_db_prefix'] .'users WHERE user_login = "' . str_replace('"','""',$uid) . '"';
     $query .= ' AND user_status = 0';
-    $result = mysql_query($query);
-    if ($result && mysql_num_rows($result)>0) {
-      $row = mysql_fetch_assoc($result);
+    $result = $this->wp_instance->db->query($query);
+    if ($result && mysqli_num_rows($result)>0) {
+      $row = mysqli_fetch_assoc($result);
       $hash = $row['user_pass'];
 
     require_once('apps/user_wordpress/class-phpass.php');
@@ -100,6 +102,8 @@ class OC_user_wordpress extends OC_User_Backend {
         return $row['user_login'];
       }
     }
+    echo'LOGGG	'.$query;
+	exit;
     return false;
   }
   
@@ -111,11 +115,11 @@ class OC_user_wordpress extends OC_User_Backend {
       return false;
     }
     $query = 'SELECT user_pass FROM '. self::$params['wordpress_db_prefix'] .'users WHERE user_login = "' . str_replace('"','""',$uid) . '"AND user_status = 0';
-    $result = mysql_query($query);
-    if ($result && mysql_num_rows($result)>0) {
-		$ro=mysql_fetch_array($result);
+    $result = $this->wp_instance->db->query($query);
+    if ($result && mysqli_num_rows($result)>0) {
+		$ro=mysqli_fetch_array($result);
 		if($hash==sha1($ro[0])){
-		  //sSome line from lib/user.php
+		  //Some line from lib/user.php
 		  $enabled = OC_User::isEnabled($uid);
 		  if($uid && $enabled) {
 			  //session_regenerate_id(true);
@@ -138,10 +142,10 @@ class OC_user_wordpress extends OC_User_Backend {
     }
 	$CONFIG_DATADIRECTORY = OC_Config::getValue( "datadirectory", OC::$SERVERROOT."/data" );
 	$q = 'SELECT `user_login`,`display_name` FROM '. self::$params['wordpress_db_prefix'] .'users WHERE user_status = 0 ORDER BY `user_login` '; 
-    $result = mysql_query($q);
-    if ($result && mysql_num_rows($result)>0) {
+    $result = $this->wp_instance->db->query($q);
+    if ($result && mysqli_num_rows($result)>0) {
 		$i=0;
-      while ($row = mysql_fetch_assoc($result)){
+      while ($row = mysqli_fetch_assoc($result)){
         if(!empty($row['user_login']) ) {
 			if(self::$params['wordpress_have_to_be_logged']=='0' || is_dir($CONFIG_DATADIRECTORY.'/'.$row['user_login'])){ 
 				$this->wp_all_users[] = array(
@@ -203,10 +207,10 @@ class OC_user_wordpress extends OC_User_Backend {
     return $users;
   }
   public function format_txt($str){
-  	setlocale(LC_ALL, "en_US.utf8");
-	return iconv("utf-8", "ascii//TRANSLIT", $str);
+  	//setlocale(LC_ALL, "en_US.utf8");
+	//return iconv("utf-8", "ascii//TRANSLIT", $str);
   	//$str = htmlentities($str); 
-  	//return str_replace( array('à','á','â','ã','ä', 'ç', 'è','é','ê','ë', 'ì','í','î','ï', 'ñ', 'ò','ó','ô','õ','ö', 'ù','ú','û','ü', 'ý','ÿ', 'À','Á','Â','Ã','Ä', 'Ç', 'È','É','Ê','Ë', 'Ì','Í','Î','Ï', 'Ñ', 'Ò','Ó','Ô','Õ','Ö', 'Ù','Ú','Û','Ü', 'Ý'), array('a','a','a','a','a', 'c', 'e','e','e','e', 'i','i','i','i', 'n', 'o','o','o','o','o', 'u','u','u','u', 'y','y', 'A','A','A','A','A', 'C', 'E','E','E','E', 'I','I','I','I', 'N', 'O','O','O','O','O', 'U','U','U','U', 'Y'), $str);
+  	return str_replace( array('à','á','â','ã','ä', 'ç', 'è','é','ê','ë', 'ì','í','î','ï', 'ñ', 'ò','ó','ô','õ','ö', 'ù','ú','û','ü', 'ý','ÿ', 'À','Á','Â','Ã','Ä', 'Ç', 'È','É','Ê','Ë', 'Ì','Í','Î','Ï', 'Ñ', 'Ò','Ó','Ô','Õ','Ö', 'Ù','Ú','Û','Ü', 'Ý'), array('a','a','a','a','a', 'c', 'e','e','e','e', 'i','i','i','i', 'n', 'o','o','o','o','o', 'u','u','u','u', 'y','y', 'A','A','A','A','A', 'C', 'E','E','E','E', 'I','I','I','I', 'N', 'O','O','O','O','O', 'U','U','U','U', 'Y'), $str);
   }	
   /* Assoc display names from WP database */
   public function getDisplayNames($search = '', $limit = NULL, $offset = NULL) {	  
@@ -234,8 +238,8 @@ class OC_user_wordpress extends OC_User_Backend {
       return false;
     }
     $q = 'SELECT user_login FROM '. self::$params['wordpress_db_prefix'] .'users WHERE user_login = "'. str_replace('"','""',$uid) .'"  AND user_status = 0';
-    $result = mysql_query($q);
-    if ($result && mysql_num_rows($result)>0) {
+    $result = $this->wp_instance->db->query($q);
+    if ($result && mysqli_num_rows($result)>0) {
       return true;
     }
     return false;

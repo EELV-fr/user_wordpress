@@ -37,9 +37,5 @@ foreach($wp_instance->params as $param=>$value){
   $tmpl->assign($param, $value);
 }
 $tmpl->assign('uid',$uid);
-<<<<<<< HEAD
-  $tmpl->assign('blogs', $blogs );
-=======
 $tmpl->assign('blogs', $blogs );
->>>>>>> debug
 $tmpl->printPage();

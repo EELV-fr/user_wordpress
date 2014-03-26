@@ -1,4 +1,4 @@
 Owncloud-Cloudpress
 ===================
 
-version : 0.2.62
+version : 0.3.0
