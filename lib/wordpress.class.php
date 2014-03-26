@@ -42,9 +42,9 @@ class OC_wordpress {
 	$this->params = $this->getParams();	
 	
 	if(OC_Appconfig::getValue('user_wordpress', 'clean_groups',0)==0){
-		$res = mysql_query('SELECT `blog_id`,`domain` FROM '. $this->wordpress_db_prefix .'blogs WHERE `deleted`=0 AND `spam`=0 ');
-	    if ($res && mysql_num_rows($res)>0) {
-	       while($blog = mysql_fetch_assoc($res)){
+		$res = $this->db->query('SELECT `blog_id`,`domain` FROM '. $this->wordpress_db_prefix .'blogs WHERE `deleted`=0 AND `spam`=0 ');
+	    if ($res->num_rows) {
+	       while($blog = mysqli_fetch_assoc($res)){
 	        OC_Group::deleteGroup($blog['domain']);
 		   }
 		}
@@ -75,20 +75,16 @@ class OC_wordpress {
     
     $errorlevel = error_reporting();
     error_reporting($errorlevel & ~E_WARNING);
-    $this->db = mysql_connect($this->params['wordpress_db_host'], $this->params['wordpress_db_user'], $this->params['wordpress_db_password']);
+
+    $this->db = new mysqli($this->params['wordpress_db_host'], $this->params['wordpress_db_user'], $this->params['wordpress_db_password'], $this->params['wordpress_db_name']);
+
     if(!$this->db){
       OC_Log::write('OC_user_wordpress',
-          'OC_user_wordpress, Failed to connect to wordpress host database: ' . mysql_error($this->db),
+          'OC_user_wordpress, Failed to connect to wordpress host database: ' . mysqli_error($this->db),
           OC_Log::ERROR);
       return false;
     }
-    mysql_select_db($this->params['wordpress_db_name'],$this->db);
-    if(!$this->db){
-      OC_Log::write('OC_user_wordpress',
-          'OC_user_wordpress, Failed to connect to wordpress database: ' . mysql_error($this->db),
-          OC_Log::ERROR);
-      return false;
-    }
+
     $this->db_conn = true;
 	return true;
   }
@@ -104,9 +100,9 @@ class OC_wordpress {
       return false;
     }
     $q = 'SELECT ID FROM '. $this->params['wordpress_db_prefix'].'users WHERE user_status = 0 AND user_login=\''.$uid.'\'';
-    $result = mysql_query($q);
-    if ($result && mysql_num_rows($result)>0) {
-      $row = mysql_fetch_array($result);
+    $result = $this->db->query($q);
+    if ($result->num_rows) {
+      $row = mysqli_fetch_array($result);
       return $row[0];     
     }
     return false;
@@ -130,9 +126,9 @@ class OC_wordpress {
 	   
       
      $q = 'SELECT meta_key FROM '. $this->params['wordpress_db_prefix'] .'usermeta WHERE user_id = \''.$user_ID.'\' AND `meta_key`LIKE\'%capabilities\' AND (`meta_value`LIKE\'%keymaster%\' OR `meta_value`LIKE\'%administrator%\' OR `meta_value`LIKE\'%editor%\' OR `meta_value`LIKE\'%author%\' OR `meta_value`LIKE\'%contributor%\')';
-	$result = mysql_query($q);
-     if ($result && mysql_num_rows($result)>0) {
-       while ($row = mysql_fetch_assoc($result)){
+	$result = $this->db->query($q);
+     if ($result->num_rows) {
+       while ($row = mysqli_fetch_assoc($result)){
          if(!empty($row['meta_key'])) {
            $blog_id = str_replace(array($this->params['wordpress_db_prefix'],'capabilities','_'),'',$row['meta_key']);
 		   if($blog_id==''){
@@ -160,9 +156,9 @@ class OC_wordpress {
     
 	foreach($blogids as $blog_id){
      if(is_numeric($blog_id)){
-           $res = mysql_query('SELECT * FROM '. $this->params['wordpress_db_prefix'].'blogs WHERE blog_id = \''.$blog_id.'\' AND `deleted`=0 AND `spam`=0');
-           if ($res && mysql_num_rows($res)>0) {
-             $blog = mysql_fetch_assoc($res);
+           $res = $this->db->query('SELECT * FROM '. $this->params['wordpress_db_prefix'].'blogs WHERE blog_id = \''.$blog_id.'\' AND `deleted`=0 AND `spam`=0');
+           if ($res->num_rows) {
+             $blog = mysqli_fetch_assoc($res);
 			  if($onlyname){
 			  	$blogs[] = $blog['domain'];
 			  }
@@ -188,9 +184,9 @@ class OC_wordpress {
     }
 	$query=($search!='')?' `domain`LIKE\'%'.str_replace("'","''",$search).'%\' AND':'';
 	$plage=($limit>0)? 'LIMIT '.$offset.','.$limit :'';
-	$res = mysql_query('SELECT `blog_id`,`domain` FROM '. $this->params['wordpress_db_prefix'] .'blogs WHERE '.$query.' `deleted`=0 AND `spam`=0 ORDER BY `domain`'.$plage);
-	if ($res && mysql_num_rows($res)>0) {
-       while($blog = mysql_fetch_assoc($res)){
+	$res = $this->db->query('SELECT `blog_id`,`domain` FROM '. $this->params['wordpress_db_prefix'] .'blogs WHERE '.$query.' `deleted`=0 AND `spam`=0 ORDER BY `domain`'.$plage);
+	if ($res->num_rows) {
+       while($blog = mysqli_fetch_assoc($res)){
        	if($search=='' || $this->params['wordpress_restrict_group']!=1 || in_array($blog['blog_id'],$current_user_blog_ids)){
        		$blogs[]=$blog['domain'];
        	}         
