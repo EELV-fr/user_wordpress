@@ -41,7 +41,7 @@ class OC_wordpress {
 	);
 	$this->params = $this->getParams();	
 	
-	if(OC_Appconfig::getValue('user_wordpress', 'clean_groups',0)==0){
+	if(OC_Appconfig::getValue('user_wordpress', 'clean_groups',0)==0 && isset($this->db)){
 		$res = $this->db->query('SELECT `blog_id`,`domain` FROM '. $this->wordpress_db_prefix .'blogs WHERE `deleted`=0 AND `spam`=0 ');
 	    if ($res->num_rows) {
 	       while($blog = mysqli_fetch_assoc($res)){

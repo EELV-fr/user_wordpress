@@ -24,7 +24,7 @@
 require_once('apps/user_wordpress/lib/wordpress.class.php');
 require_once('apps/user_wordpress/user_wordpress.php');
 require_once('apps/user_wordpress/group_wordpress.php');
-OC::$CLASSPATH['OC_wordpress_images_menu_sites_icon'] = '/apps/user_wordpress/img/sites.png';  
+OC::$CLASSPATH['OC_wordpress_images_menu_sites_icon'] = OC::$WEBROOT.'/apps/user_wordpress/img/wordpress.svg';  
 OC::$CLASSPATH['OC_wordpress'] = 'apps/user_wordpress/lib/wordpress.class.php';  
 OC::$CLASSPATH['OC_wordpress_site_list'] = OC::$WEBROOT.'/apps/user_wordpress/wordpress.php';
 

@@ -1,3 +1,11 @@
+v 0.3.0
+Fix : OC6 friendly
+Fix : MySQL to MySQLi by juergenhecht & bastho
+Fix : Bug fixes and some JS optimization
+Fix : subdirectory images path
+Add : DE language by glasklar 
+Add : New WordPress 3.8.* SVG icons 
+
 v 0.2.7
 Add: add contributors to authorized users
 Add: correct search params
