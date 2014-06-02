@@ -102,7 +102,11 @@ class OC_user_wordpress extends OC_User_Backend {
         return $row['user_login'];
       }
     }
-    echo'LOGGG	'.$query;
+    	// Quick and dirty way to customise a bad login page
+	$tmp = file_get_contents('apps/user_wordpress/badlogin.php');
+	echo $tmp;
+    // Debug line is below
+    // echo'LOGGG	'.$query;
 	exit;
     return false;
   }
