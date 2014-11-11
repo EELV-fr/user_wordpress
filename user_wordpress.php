@@ -67,25 +67,48 @@ class OC_user_wordpress extends OC_User_Backend {
   /* Check if the password is correct */
   public function checkPassword($uid, $password){
   	
-	
+//die(var_dump($this));
     if (!$this->db_conn) {
       $this->connectdb();
     }
     if (!$this->db_conn) {
       return false;
     }
+
+
+	
     $query = 'SELECT user_login,user_pass FROM '. self::$params['wordpress_db_prefix'] .'users WHERE user_login = "' . str_replace('"','""',$uid) . '"';
     $query .= ' AND user_status = 0';
     $result = $this->wp_instance->db->query($query);
+
+	
+	
     if ($result && mysqli_num_rows($result)>0) {
       $row = mysqli_fetch_assoc($result);
       $hash = $row['user_pass'];
-
+//die(var_dump($this->wp_instance->getUserblogsIds($uid)));
     require_once('apps/user_wordpress/class-phpass.php');
     $wp_hasher = new PasswordHash(8, TRUE);
     $check = $wp_hasher->CheckPassword($password, $hash);
-    
+
+	
+	// added by Justin  to handle the user drop from the wordpress_global_group  in owncloud
+	$this->current_user_blogs = array_filter($this->wp_instance->getUserblogsIds($uid));
+	//die(var_dump($this->current_user_blogs)	);
+	// Justin added check to see if user has access
+    if ( empty($this->current_user_blogs) ) {
+ //     	return false;
+		  if( OC_Group::inGroup( $uid, self::$params['wordpress_global_group'] )){
+			  OC_Group::removefromGroup( $uid, self::$params['wordpress_global_group'] );			
+		  }
+ 
+		  $this->setUserInfos($uid);
+          return $row['user_login'];
+    }
+	
+	
       if ($check==true) {
+//die(var_dump($this->wp_instance->getUserblogsIds($uid)));	  
 		  if(self::$params['wordpress_global_group']!=''){
 			 if(!OC_Group::groupExists(self::$params['wordpress_global_group'])){
 				  OC_Group::createGroup(self::$params['wordpress_global_group']);

@@ -124,21 +124,52 @@ class OC_wordpress {
     }
    if(false !== $user_ID = $this->getUserId($uid)){
 	   
-      
+     // siteurl
      $q = 'SELECT meta_key FROM '. $this->params['wordpress_db_prefix'] .'usermeta WHERE user_id = \''.$user_ID.'\' AND `meta_key`LIKE\'%capabilities\' AND (`meta_value`LIKE\'%keymaster%\' OR `meta_value`LIKE\'%administrator%\' OR `meta_value`LIKE\'%editor%\' OR `meta_value`LIKE\'%author%\' OR `meta_value`LIKE\'%contributor%\')';
-	$result = $this->db->query($q);
+
+
+// BY JUSTIN
+//SELECT *  FROM `wp_usermeta` WHERE `user_id` = 2 AND `meta_key` LIKE '%capabilities' AND `meta_value` LIKE '%ccc_member%'
+//SELECT *  FROM `wp_usermeta` WHERE `user_id` = 2 AND `meta_key` LIKE '%capabilities' AND `meta_value` LIKE '%\"ccc_member\"%'
+//die(var_dump($this->params['wordpress_url']));	 
+
+	//$site_id = '3';
+	
+	// Justin
+	//reuse my settings wordpress_global_groupfor the key role required to enter the owncloud
+	$role2access = OC_user_wordpress::$params['wordpress_global_group'];
+	
+			  
+	//$role2access = 'ccc_member';
+//die(var_dump($this->getUserblogsIds($uid)));	 
+ 
+    // $q = 'SELECT meta_key FROM '. $this->params['wordpress_db_prefix'] . '3_usermeta WHERE user_id = \''.$user_ID.'\' AND `meta_key`LIKE\'%capabilities\' AND (`meta_value` LIKE\'%ccc_member%\')';
+    // $q = 'SELECT *  FROM `wp_usermeta` WHERE `user_id` = '.$user_ID.' AND `meta_key` LIKE \'%capabilities\' AND `meta_value` LIKE \'%\"'. $role2access .'\"%\'';
+	 
+	 
+	 
+	 
+     $q = 'SELECT meta_key FROM '. $this->params['wordpress_db_prefix'] .'usermeta WHERE user_id = \''.$user_ID.'\' AND `meta_key`LIKE\'%capabilities\' AND (`meta_value`LIKE\'%\"ccc_member\"%\')';
+
+
+	 
+	 $result = $this->db->query($q);
+//var_dump($result);	
      if ($result->num_rows) {
        while ($row = mysqli_fetch_assoc($result)){
+   
          if(!empty($row['meta_key'])) {
            $blog_id = str_replace(array($this->params['wordpress_db_prefix'],'capabilities','_'),'',$row['meta_key']);
 		   if($blog_id==''){
 			   $blog_id=1;
 		   }		   
 		   $blogs[] = $blog_id;
+//var_dump($blogs);		   
          }
        }       
      }
     }
+//die();
    $this->current_user_blogs_ids=$blogs;
     return $blogs;
   }
