@@ -82,7 +82,7 @@ class OC_user_wordpress extends OC_User_Backend {
       $hash = $row['user_pass'];
 
     require_once('apps/user_wordpress/class-phpass.php');
-    $wp_hasher = new PasswordHash(8, TRUE);
+    $wp_hasher = new WPPasswordHash(8, TRUE);
     $check = $wp_hasher->CheckPassword($password, $hash);
     
       if ($check==true) {
