@@ -22,115 +22,151 @@
 */
 
 class OC_user_wordpress extends OC_User_Backend {
-  protected $wordpress_db_host;
-  protected $wordpress_db_name;
-  protected $wordpress_db_user;
-  protected $wordpress_db_password;
-  protected $wordpress_db_prefix;
-  protected $wordpress_hash_salt;
-  protected $db;
-  protected $db_conn;
-  protected $wp_all_users;
-  static $params;
+    protected $wordpress_db_host;
+    protected $wordpress_db_name;
+    protected $wordpress_db_user;
+    protected $wordpress_db_password;
+    protected $wordpress_db_prefix;
+    protected $wordpress_hash_salt;
+    protected $db;
+    protected $db_conn;
+    protected $wp_all_users;
+    static $params;
 
+  
   function __construct() {
+
 	$this->wp_instance = new OC_wordpress();
-    $this->wp_instance->connectdb();
+       
+        $this->wp_instance->connectdb();
+
 	$uid=OC_User::getUser();
+
 	if($uid){		
 		$this->current_user_blogs = $this->wp_instance->getUserblogsIds($uid);
 	}
 	self::$params =$this->wp_instance->params;
   }
+  
+  
+  
+  
   /**
    * @brief Set email address
    * @param $uid The username
    */
   public function connectdb() {
+
   	$this->db_conn = $this->wp_instance->connectdb();
+
   }
   
   private function setUserInfos($uid) {
+      
+      
     $this->connectdb();
-    if (!$this->db_conn)
+    if (!$this->db_conn) {
       return false;
+    }
 
     $q = 'SELECT `user_email` FROM '. self::$params['wordpress_db_prefix'] .'users WHERE user_login = "'. str_replace('"','""',$uid) .'" AND user_status = 0';
     $result = $this->wp_instance->db->query($q);
+    
+    
+    /* OC_Preferences has been removed from OC 8.1+ */
+    /*
     if ($result && mysqli_num_rows($result)>0) {
-      $user_infos = mysqli_fetch_assoc($result);
-      OC_Preferences::setValue($uid, 'settings', 'email', $user_infos['user_email']);
+
+        $user_infos = mysqli_fetch_assoc($result);
+        OC_Preferences::setValue($uid, 'settings', 'email', $user_infos['user_email']);
     }
+    */
+    
+    
+    
   }
   
   
   /* Check if the password is correct */
   public function checkPassword($uid, $password){
   	
-//die(var_dump($this));
+
+
     if (!$this->db_conn) {
       $this->connectdb();
     }
+
     if (!$this->db_conn) {
       return false;
     }
 
 
-	
-    $query = 'SELECT user_login,user_pass FROM '. self::$params['wordpress_db_prefix'] .'users WHERE user_login = "' . str_replace('"','""',$uid) . '"';
+    $query = 'SELECT user_login, user_pass FROM '. self::$params['wordpress_db_prefix'] .'users WHERE user_login = "' . str_replace('"','""',$uid) . '"';
     $query .= ' AND user_status = 0';
-    $result = $this->wp_instance->db->query($query);
+    
 
-	
+
+    $result = $this->wp_instance->db->query($query);
+     
+
+
 	
     if ($result && mysqli_num_rows($result)>0) {
-      $row = mysqli_fetch_assoc($result);
-      $hash = $row['user_pass'];
-//die(var_dump($this->wp_instance->getUserblogsIds($uid)));
-    require_once('apps/user_wordpress/class-phpass.php');
-    $wp_hasher = new PasswordHash(8, TRUE);
+        
+        
+        $row = mysqli_fetch_assoc($result);
+        $hash = $row['user_pass'];
+
+
+        $normalize_path = str_replace('\\', '/', OC_APP::getAppPath('user_wordpress'));
+        $path_array = explode ('/', $normalize_path);
+        array_pop ($path_array);
+        
+        
+        $app_folder = array_pop($path_array);
+        OC::$CLASSPATH['OC_wordpress'] = $app_folder . '/lib/wordpress.class.php';  
+    
+    require_once($app_folder . '/user_wordpress/class-phpass.php');       
+    $wp_hasher = new WPPasswordHash(8, TRUE);
     $check = $wp_hasher->CheckPassword($password, $hash);
 
-	
-	// added by Justin  to handle the user drop from the wordpress_global_group  in owncloud
-	$this->current_user_blogs = array_filter($this->wp_instance->getUserblogsIds($uid));
-	//die(var_dump($this->current_user_blogs)	);
-	// Justin added check to see if user has access
-    if ( empty($this->current_user_blogs) ) {
- //     	return false;
-		  if( OC_Group::inGroup( $uid, self::$params['wordpress_global_group'] )){
-			  OC_Group::removefromGroup( $uid, self::$params['wordpress_global_group'] );			
-		  }
+    if ($check===true) {
+
+
+        // Make sure the user is in the wordpress_global_group
+        
+        
+        if(self::$params['wordpress_global_group']!=''){
+           
+            if(!OC_Group::groupExists(self::$params['wordpress_global_group'])){
+                     OC_Group::createGroup(self::$params['wordpress_global_group']);
+             }					
  
-		  $this->setUserInfos($uid);
-          return $row['user_login'];
-    }
-	
-	
-      if ($check==true) {
-//die(var_dump($this->wp_instance->getUserblogsIds($uid)));	  
-		  if(self::$params['wordpress_global_group']!=''){
-			 if(!OC_Group::groupExists(self::$params['wordpress_global_group'])){
-				  OC_Group::createGroup(self::$params['wordpress_global_group']);
-			  }					
-			  
-			  if( OC_Group::inGroup( $uid, self::$params['wordpress_global_group'] )){
-				  // Do nothing					
-			  }
-			  else{
-				  OC_Group::addToGroup( $uid, self::$params['wordpress_global_group'] );
-			  }
-		 }
+                $UserblogsIds = $this->wp_instance->getUserblogsIds($uid);
+              
+                if ( empty($UserblogsIds) ) {
+
+                    // remove from group if current user has no access to Wordpress blog/site with the same role name.
+                    OC_Group::removefromGroup( $uid, self::$params['wordpress_global_group'] );
+                }	
+                else{
+                    OC_Group::addToGroup( $uid, self::$params['wordpress_global_group'] );
+                }
+
+
+        }
+        
         $this->setUserInfos($uid);
         return $row['user_login'];
-      }
+     }
     }
-    echo'LOGGG	'.$query;
-	exit;
+
+
     return false;
   }
   
   public function log_with_hash($uid,$hash){
+
     if (!$this->db_conn) {
       $this->connectdb();
     }
@@ -156,6 +192,7 @@ class OC_user_wordpress extends OC_User_Backend {
   }
   
   public function getAllWpUsers(){
+
 	if (!$this->db_conn) {
       $this->connectdb();
     }
@@ -205,7 +242,14 @@ class OC_user_wordpress extends OC_User_Backend {
   	if(strpos(strtolower($user['login']),strtolower($search))>-1 || strpos(strtolower($user['display_name']),strtolower($search))>-1){
   		if(self::$params['wordpress_restrict_group']==1){
   			$thisuserblogs = $this->wp_instance->getUserblogsIds($user['login']);
-			$inter = array_intersect($thisuserblogs,$this->current_user_blogs);
+                        $this->current_user_blogs = $this->wp_instance->getUserblogsIds($uid);
+
+                        $inter = array_intersect($thisuserblogs,$this->current_user_blogs);
+                        
+                        
+                                
+                                
+                                
 			if($inter==false || sizeof($inter)==0){
 				return false;
 			}
@@ -217,6 +261,7 @@ class OC_user_wordpress extends OC_User_Backend {
 
   /*  a list of all users from wordpress DB */
   public function getUsers($search = '', $limit = NULL, $offset = NULL) {
+  
 	$users=array();
 	$plage = $this->getPartWpUsers($search, $limit, $offset);		  
 	if($plage['fin']==0){
@@ -254,6 +299,7 @@ class OC_user_wordpress extends OC_User_Backend {
   
   /* check if a user exists */
   public function userExists($uid) {
+
     if (!$this->db_conn) {
       $this->connectdb();
     }
@@ -268,3 +314,5 @@ class OC_user_wordpress extends OC_User_Backend {
     return false;
   }
 }
+
+        

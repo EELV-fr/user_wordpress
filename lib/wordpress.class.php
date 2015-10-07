@@ -84,9 +84,9 @@ class OC_wordpress {
           OC_Log::ERROR);
       return false;
     }
-
+    
     $this->db_conn = true;
-	return true;
+    return true;
   }
   
    
@@ -112,73 +112,81 @@ class OC_wordpress {
   
   /* retrieves user sites list */
   public function getUserblogsIds($uid=NULL) {
-  	if (!$this->db_conn) {
+    if (!$this->db_conn) {
       $this->connectdb();
     }
 	
-	if($uid==NULL) $uid=OC_User::getUser();
-	//if(isset($this->current_user_blogs_ids)) return $this->current_user_blogs_ids;
+    if($uid==NULL) $uid=OC_User::getUser();
+    //if(isset($this->current_user_blogs_ids)) return $this->current_user_blogs_ids;
     $blogs = array();
     if (!$this->db_conn) {
       return $blogs;
     }
    if(false !== $user_ID = $this->getUserId($uid)){
-	   
-     // siteurl
-     $q = 'SELECT meta_key FROM '. $this->params['wordpress_db_prefix'] .'usermeta WHERE user_id = \''.$user_ID.'\' AND `meta_key`LIKE\'%capabilities\' AND (`meta_value`LIKE\'%keymaster%\' OR `meta_value`LIKE\'%administrator%\' OR `meta_value`LIKE\'%editor%\' OR `meta_value`LIKE\'%author%\' OR `meta_value`LIKE\'%contributor%\')';
 
-
-// BY JUSTIN
-//SELECT *  FROM `wp_usermeta` WHERE `user_id` = 2 AND `meta_key` LIKE '%capabilities' AND `meta_value` LIKE '%ccc_member%'
-//SELECT *  FROM `wp_usermeta` WHERE `user_id` = 2 AND `meta_key` LIKE '%capabilities' AND `meta_value` LIKE '%\"ccc_member\"%'
-//die(var_dump($this->params['wordpress_url']));	 
-
-	//$site_id = '3';
-	
-	// Justin
-	//reuse my settings wordpress_global_groupfor the key role required to enter the owncloud
-	$role2access = OC_user_wordpress::$params['wordpress_global_group'];
-	
-			  
-	//$role2access = 'ccc_member';
-//die(var_dump($this->getUserblogsIds($uid)));	 
+         
+//find the blog/site id from Wordpress wp_blogs table and make sure that the user has the capacity on that site too.
+$q = 'SELECT blog_id, path FROM wp_blogs';
+$result = $this->db->query($q);
+$ref_site_id = '';
+if ($result->num_rows) {
+  while ($row = mysqli_fetch_assoc($result)){
+      
+      $oc_settings_host = $this->params['wordpress_url'] . '/';
  
-    // $q = 'SELECT meta_key FROM '. $this->params['wordpress_db_prefix'] . '3_usermeta WHERE user_id = \''.$user_ID.'\' AND `meta_key`LIKE\'%capabilities\' AND (`meta_value` LIKE\'%ccc_member%\')';
-    // $q = 'SELECT *  FROM `wp_usermeta` WHERE `user_id` = '.$user_ID.' AND `meta_key` LIKE \'%capabilities\' AND `meta_value` LIKE \'%\"'. $role2access .'\"%\'';
-	 
-	 
-	 
-	 
-     $q = 'SELECT meta_key FROM '. $this->params['wordpress_db_prefix'] .'usermeta WHERE user_id = \''.$user_ID.'\' AND `meta_key`LIKE\'%capabilities\' AND (`meta_value`LIKE\'%\"ccc_member\"%\')';
+      
+       if(!empty($row['path']) && $this->endsWith( $oc_settings_host, $row['path']  )) {
+           $ref_site_id = $row['blog_id'];
+           break;
+       }
+  }
+} 
+         
+// limit the found users to those with the capability of the group name defined in cloud press settings
+         
+if ($this->params['wordpress_global_group']) {
+    // take the role name that the current user requires from the oc settings
+    $key_role = $this->params['wordpress_global_group'];
+} else {
+    // otherise find all sites that the current users has access with any role
+    $key_role = '';
+}
 
+if ( $ref_site_id != '' ) {
+    // Multi-site WP site install.
+    if ( $ref_site_id === '1' ) {
+        $search_for_meta_key = $this->params['wordpress_db_prefix'] . 'capabilities';
+    } else {
+        $search_for_meta_key = $this->params['wordpress_db_prefix'] . $ref_site_id . '_capabilities';
+    }
+    
 
-	 
-	 $result = $this->db->query($q);
-//var_dump($result);	
+    $q = 'SELECT meta_key FROM '. $this->params['wordpress_db_prefix'] .'usermeta WHERE user_id = \''.$user_ID.'\' AND `meta_key`LIKE\''. $search_for_meta_key . '\' AND (`meta_value`LIKE\'%' . $key_role . '%\' )'; 
+} else {
+    // assumed to be a single WP site install.
+    $q = 'SELECT meta_key FROM '. $this->params['wordpress_db_prefix'] .'usermeta WHERE user_id = \''.$user_ID.'\' AND `meta_key`LIKE\'%capabilities\' AND (`meta_value`LIKE\'%' . $key_role . '%\' )'; 
+}
+
+	$result = $this->db->query($q);
      if ($result->num_rows) {
        while ($row = mysqli_fetch_assoc($result)){
-   
-         if(!empty($row['meta_key'])) {
-           $blog_id = str_replace(array($this->params['wordpress_db_prefix'],'capabilities','_'),'',$row['meta_key']);
-		   if($blog_id==''){
-			   $blog_id=1;
-		   }		   
-		   $blogs[] = $blog_id;
-//var_dump($blogs);		   
-         }
-       }       
-     }
+            if(!empty($row['meta_key'])) {
+                $blog_id = str_replace(array($this->params['wordpress_db_prefix'],'capabilities','_'),'',$row['meta_key']);
+                    if($blog_id==''){
+                        $blog_id='1';
+                    }		   
+                $blogs[] = $blog_id;
+            }
+       }   
     }
-//die();
-   $this->current_user_blogs_ids=$blogs;
+    }
+
     return $blogs;
   }
   public function getUserblogs($uid,$onlyname=false) {	
     if (!$this->db_conn) {
       $this->connectdb();
     }
-	
-	//if(isset($this->current_user_blogs)) return $this->current_user_blogs;
 	
     $blogs = array();
 	
@@ -188,7 +196,7 @@ class OC_wordpress {
 	foreach($blogids as $blog_id){
      if(is_numeric($blog_id)){
            $res = $this->db->query('SELECT * FROM '. $this->params['wordpress_db_prefix'].'blogs WHERE blog_id = \''.$blog_id.'\' AND `deleted`=0 AND `spam`=0');
-           if ($res->num_rows) {
+           if ($res && $res->num_rows) {
              $blog = mysqli_fetch_assoc($res);
 			  if($onlyname){
 			  	$blogs[] = $blog['domain'];
@@ -201,8 +209,11 @@ class OC_wordpress {
       }
     }
 	$this->current_user_blogs=$blogs;
+     
     return $blogs;
   }
+  
+  
   public function getAllblogs($search = '', $limit = -1, $offset = 0) {
   		
     if (!$this->db_conn) {
@@ -216,7 +227,7 @@ class OC_wordpress {
 	$query=($search!='')?' `domain`LIKE\'%'.str_replace("'","''",$search).'%\' AND':'';
 	$plage=($limit>0)? 'LIMIT '.$offset.','.$limit :'';
 	$res = $this->db->query('SELECT `blog_id`,`domain` FROM '. $this->params['wordpress_db_prefix'] .'blogs WHERE '.$query.' `deleted`=0 AND `spam`=0 ORDER BY `domain`'.$plage);
-	if ($res->num_rows) {
+	if ($res && $res->num_rows) {
        while($blog = mysqli_fetch_assoc($res)){
        	if($search=='' || $this->params['wordpress_restrict_group']!=1 || in_array($blog['blog_id'],$current_user_blog_ids)){
        		$blogs[]=$blog['domain'];
@@ -225,5 +236,12 @@ class OC_wordpress {
     }
     return $blogs;
   }
+  
+  
 
+    
+    function endsWith($haystack, $needle) {
+        // search forward starting from end minus needle length characters
+        return $needle === "" || (($temp = strlen($haystack) - strlen($needle)) >= 0 && strpos($haystack, $needle, $temp) !== FALSE);
+    }
 }

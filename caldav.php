@@ -23,7 +23,9 @@ require_once('apps/calendar/appinfo/app.php');
 
 require_once(OC::$CLASSPATH['OC_Connector_Sabre_CalDAV']);
 
-require_once('apps/user_wordpress/lib/autoauth.php');
+$app_rel_path = "apps_for_ccc";
+require_once($app_rel_path . '/lib/autoauth.php');
+//require_once('apps/user_wordpress/lib/autoauth.php');
 
 
 // Backends
