@@ -29,7 +29,13 @@
 $RUNTIME_APPTYPES=array('filesystem','authentication','share');//
 OC_App::loadApps($RUNTIME_APPTYPES);
 
-require_once('apps/user_wordpress/lib/autoauth.php');
+
+$normalize_path = str_replace('\\', '/', OC_APP::getAppPath('user_wordpress'));
+$path_array = explode ('/', $normalize_path);
+array_pop ($path_array);
+$app_folder = array_pop($path_array);
+require_once($app_folder . '/lib/autoauth.php');
+//require_once('apps/user_wordpress/lib/autoauth.php');
 
 if(isset($_REQUEST['share_link'])){
 	if (OC_App::isEnabled('files_sharing')) {

@@ -21,12 +21,29 @@
 *
 */
 
-require_once('apps/user_wordpress/lib/wordpress.class.php');
-require_once('apps/user_wordpress/user_wordpress.php');
-require_once('apps/user_wordpress/group_wordpress.php');
-OC::$CLASSPATH['OC_wordpress_images_menu_sites_icon'] = OC::$WEBROOT.'/apps/user_wordpress/img/wordpress.svg';  
-OC::$CLASSPATH['OC_wordpress'] = 'apps/user_wordpress/lib/wordpress.class.php';  
-OC::$CLASSPATH['OC_wordpress_site_list'] = OC::$WEBROOT.'/apps/user_wordpress/wordpress.php';
+
+
+$app_path = OC_APP::getAppPath('user_wordpress');
+
+
+ 
+
+require_once($app_path . '/lib/wordpress.class.php');
+require_once($app_path . '/user_wordpress.php');
+require_once($app_path . '/group_wordpress.php');
+
+
+
+OC::$CLASSPATH['OC_wordpress_images_menu_sites_icon'] = $app_path . '/img/wordpress.svg';  
+
+
+$normalize_path = str_replace('\\', '/', OC_APP::getAppPath('user_wordpress'));
+$path_array = explode ('/', $normalize_path);
+array_pop ($path_array);
+$app_folder = array_pop($path_array);
+OC::$CLASSPATH['OC_wordpress'] = $app_folder . '/lib/wordpress.class.php';  
+
+OC::$CLASSPATH['OC_wordpress_site_list'] = $app_path . '/wordpress.php';
 
 
 OCP\Util::addStyle('user_wordpress', 'wordpress');
@@ -42,6 +59,7 @@ OCP\App::registerAdmin('user_wordpress','settings');
 OCP\App::registerPersonal('user_wordpress', 'persopress');
 
 $wp_instance = new OC_wordpress();
+
 if (isset($_POST['wordpress_settings_post'])) {
   foreach($wp_instance->params as $param=>$value){
     if(isset($_POST[$param])){
