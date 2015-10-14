@@ -1,10 +1,15 @@
+v 0.4.0
+Add: starting point for multisite to drop the allocated group.
+Fix: owncloud 8.1+
+by Justin Fletcher
+
 v 0.3.0
-Fix : OC6 friendly
-Fix : MySQL to MySQLi by juergenhecht & bastho
-Fix : Bug fixes and some JS optimization
-Fix : subdirectory images path
-Add : DE language by glasklar 
-Add : New WordPress 3.8.* SVG icons 
+Fix: OC6 friendly
+Fix: MySQL to MySQLi by juergenhecht & bastho
+Fix: Bug fixes and some JS optimization
+Fix: subdirectory images path
+Add: DE language by glasklar 
+Add: New WordPress 3.8.* SVG icons 
 
 v 0.2.7
 Add: add contributors to authorized users
@@ -12,46 +17,46 @@ Add: correct search params
 Fix: PHP warning in users list
 
 v 0.2.63
-Fix : do not show publish in trashbin
+Fix: do not show publish in trashbin
 
 v 0.2.62
-Add : Dialog in admin panel to confirm WP database connection
+Add: Dialog in admin panel to confirm WP database connection
 
 v 0.2.61
-Fix : PHP warning 'user_login' index
+Fix: PHP warning 'user_login' index
 
 v 0.2.6
-Add : Optionnal blog group restriction for user search
+Add: Optionnal blog group restriction for user search
 Add: Display name for users
-Add : Optionnal "Sites" button in the main menu
-Fix : Performances optimizations
-Fix : Bugfix
+Add: Optionnal "Sites" button in the main menu
+Fix: Performances optimizations
+Fix: Bugfix
 
 v 0.2.5
-Fix : OC5 friendly
+Fix: OC5 friendly
 
 v 0.2.4
-Add : Wordav protocol, to let wordpress access your files
+Add: Wordav protocol, to let wordpress access your files
 
 v 0.2.3
-Fix : remove WP action_key filtering
-Add : Improve french translation
+Fix: remove WP action_key filtering
+Add: Improve french translation
 
 v 0.2.2
-Fix : user search is now working properly
+Fix: user search is now working properly
 
 v 0.2.1
-Add : Create au group for all wordpress users
+Add: Create au group for all wordpress users
 
 v 0.2.0
-Add : option to display only users already logged-in
-Add : Auto create groups for each WP-blogs
+Add: option to display only users already logged-in
+Add: Auto create groups for each WP-blogs
 
 v 0.1.2
-Fix : fix a PHP error, allows to connect via webdav clients
+Fix: fix a PHP error, allows to connect via webdav clients
 
 v 0.1.1
-Add : hide wordpress DB password in admin panel
+Add: hide wordpress DB password in admin panel
 
 V 0.1.0
 Initial release
