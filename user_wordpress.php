@@ -314,6 +314,3 @@ class OC_user_wordpress extends OC_User_Backend {
     return false;
   }
 }
-
-        
->>>>>>> upstream/master
